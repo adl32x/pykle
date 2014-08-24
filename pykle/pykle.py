@@ -5,6 +5,7 @@ import os
 import json
 from jinja2 import Template, FileSystemLoader, Environment
 import imp
+import shutil
 
 working_dir = os.getcwd()
 
@@ -25,7 +26,11 @@ def create_file(fname, contents):
   with open(fname, "w") as f:
       f.write(contents)  
 
-
+def copy_file(fname, dist_fname):
+  if not os.path.exists(os.path.dirname(dist_fname)):
+      os.makedirs(os.path.dirname(dist_fname))
+  shutil.copyfile(fname, dist_fname)
+  
 def find_files():
   file_list = []
   for root, dirs, files in os.walk(os.getcwd()):
@@ -71,9 +76,10 @@ for f in file_list:
     print "- Format: %s" % current_file_ext    
 
   if "__copy" in current_file:
-    contents = open_file(current_file)
+    #contents = open_file(current_file)
     dist_file = dist_file.replace("__copy", "")
-    create_file(dist_file, contents)
+    #create_file(dist_file, contents)
+    copy_file(current_file, dist_file)
   elif current_file_ext == "html":
     env  = Environment(loader=FileSystemLoader(''))
     template = env.get_template(current_file.replace(working_dir+"/", ""))
@@ -82,7 +88,7 @@ for f in file_list:
       data = open_file_json(current_file + ".data")
     rendered = template.render(data=data)
     create_file(dist_file, rendered)
-  elif current_file_ext == "fill_data":
+  elif current_file_ext == ".json" and "__fill" in current_file:
     env  = Environment(loader=FileSystemLoader(''))
     djson_data = open_file_json(current_file)
     template = env.get_template(djson_data["template"])
