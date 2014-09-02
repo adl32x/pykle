@@ -6,6 +6,7 @@ import json
 from jinja2 import Template, FileSystemLoader, Environment
 import imp
 import shutil
+from subprocess import call
 
 working_dir = os.getcwd()
 
@@ -14,6 +15,11 @@ def open_file(fname):
   with open(fname) as f:
       content = f.read()
       return content
+
+
+def handle_script(fname):
+  if fname.endswith("__run.py"): 
+   call(["python", fname])
 
 
 def open_file_json(fname):
@@ -26,10 +32,12 @@ def create_file(fname, contents):
   with open(fname, "w") as f:
       f.write(contents)  
 
+
 def copy_file(fname, dist_fname):
   if not os.path.exists(os.path.dirname(dist_fname)):
       os.makedirs(os.path.dirname(dist_fname))
   shutil.copyfile(fname, dist_fname)
+  
   
 def find_files():
   file_list = []
@@ -47,9 +55,8 @@ file_list = find_files()
 
 for f in file_list:
   current_file = f["file"]
-  if current_file.endswith("__run.py"):
-    module = imp.load_source('module.name', current_file)
-    module.do()
+  if "__run" in current_file:
+    handle_script(current_file)
 
 file_list = find_files()
 
@@ -58,6 +65,7 @@ file_dict = {}
 for f in file_list:
   file_dict[f["file"]] = file    
   
+
 for f in file_list:
   current_file = f["file"]
   dist_file = f["dist"]
