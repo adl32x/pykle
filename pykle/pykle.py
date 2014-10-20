@@ -8,6 +8,10 @@ import imp
 import shutil
 from subprocess import call
 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 working_dir = os.getcwd()
 
 
@@ -69,6 +73,7 @@ for f in file_list:
 for f in file_list:
   current_file = f["file"]
   dist_file = f["dist"]
+  
   if "dist" in current_file:
     continue
 
@@ -96,7 +101,7 @@ for f in file_list:
       data = open_file_json(current_file + ".data")
     rendered = template.render(data=data)
     create_file(dist_file, rendered)
-  elif current_file_ext == ".json" and "__fill" in current_file:
+  elif current_file_ext == "json" and "__fill" in current_file:
     env  = Environment(loader=FileSystemLoader(''))
     djson_data = open_file_json(current_file)
     template = env.get_template(djson_data["template"])
